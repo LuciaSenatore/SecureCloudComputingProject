@@ -1,0 +1,40 @@
+name: Download Data Function
+description: Download data from sklearn datasets
+
+inputs:
+- {name: DataCD, type: LocalPath, description: 'Path where count digit feature is stored.'}
+- {name: DataCS, type: LocalPath, description: 'Path where count special character feature is stored.'}
+- {name: DataIP, type: LocalPath, description: 'Path where IP address feature is stored.'}
+- {name: DataSS, type: LocalPath, description: 'Path where short service feature is stored.'}
+- {name: DataCL, type: LocalPath, description: 'Path where count letter feature is stored.'}
+- {name: DataHN, type: LocalPath, description: 'Path where host name feature is stored.'}
+- {name: DataHTTPS, type: LocalPath, description: 'Path where HTTPS feature is stored.'}
+- {name: DataLen, type: LocalPath, description: 'Path where lenght feature is stored.'}
+outputs:
+- {name: DataOut, type: LocalPath, description: 'Path where data will be stored.'}
+
+implementation:
+  container:
+    image: luciasenatore/load_data
+    command: [
+      python, load_data.py,
+
+      
+      {inputPath: DataCD},
+     
+      {inputPath: DataCS},
+     
+      {inputPath: DataIP},
+      
+      {inputPath: DataSS},
+    
+      {inputPath: DataCL},
+
+      {inputPath: DataHN},
+      
+      {inputPath: DataHTTPS},
+   
+      {inputPath: DataLen},
+
+      {outputPath: DataOut},
+    ]

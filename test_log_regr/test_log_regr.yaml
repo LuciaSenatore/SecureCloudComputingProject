@@ -1,0 +1,34 @@
+name: LogisticRegression Classifier
+description: Returns the best model and the accuracy of a LogisticRegression Classifier
+
+inputs:
+- {name: TestData, type: LocalPath, description: 'Dataset'}
+- {name: Model, type: LocalPath, description: 'Best LogisticRegression model'}
+- {name: Scaler, type: LocalPath, description: 'Best LogisticRegression scaler'}
+
+outputs:
+- {name: ModelLR, type: LocalPath, description: 'Best LogisticRegression model'}
+- {name: ScalerLR, type: LocalPath, description: 'Best LogisticRegression scaler'}
+- {name: AccuracyLR, type: Float, description: 'LogisticRegression Accuracy metric'}
+
+
+implementation:
+  container:
+    image: luciasenatore/test_log_regr
+    command: [
+      python, test_logistic_regression.py,
+
+      {inputPath: TestData},
+
+      {inputPath: Model},
+
+      {inputPath: Scaler},
+
+      {outputPath: ModelLR},
+
+      {outputPath: ScalerLR},
+
+      {outputPath: AccuracyLR},
+
+
+    ]

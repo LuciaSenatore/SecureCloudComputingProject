@@ -1,0 +1,48 @@
+cd load_raw_dataset
+docker build --tag load_raw_dataset .
+docker tag load_raw_dataset luciasenatore/load_raw_dataset
+docker push docker.io/luciasenatore/load_raw_dataset
+
+cd url_count_digit_ext
+docker build --tag url_count_digit_ext . && docker tag url_count_digit_ext luciasenatore/url_count_digit_ext && docker push docker.io/luciasenatore/url_count_digit_ext
+
+cd url_count_letters_ext
+docker build --tag url_count_letters_ext . && docker tag url_count_letters_ext luciasenatore/url_count_letters_ext  && docker push docker.io/luciasenatore/url_count_letters_ext
+
+cd .. && cd url_hasipaddr_ext 
+docker build --tag url_hasipaddr_ext . && docker tag url_hasipaddr_ext luciasenatore/url_hasipaddr_ext && docker push docker.io/luciasenatore/url_hasipaddr_ext
+
+cd .. && cd url_hostname_ext
+docker build --tag url_hostname_ext . && docker tag url_hostname_ext luciasenatore/url_hostname_ext && docker push docker.io/luciasenatore/url_hostname_ext
+
+cd .. && cd url_https_ext
+docker build --tag url_https_ext . && docker tag url_https_ext luciasenatore/url_https_ext && docker push docker.io/luciasenatore/url_https_ext
+
+cd .. && cd url_len_ext
+docker build --tag url_len_ext . && docker tag url_len_ext luciasenatore/url_len_ext && docker push docker.io/luciasenatore/url_len_ext
+
+cd .. && cd url_shortserv_ext
+docker build --tag url_shortserv_ext . && docker tag url_shortserv_ext luciasenatore/url_shortserv_ext && docker push docker.io/luciasenatore/url_shortserv_ext
+
+cd .. && cd url_spechar_ext
+docker build --tag url_spechar_ext . && docker tag url_spechar_ext luciasenatore/url_spechar_ext && docker push docker.io/luciasenatore/url_spechar_ext
+
+cd load_data
+docker build --tag load_data . && docker tag load_data luciasenatore/load_data && docker push docker.io/luciasenatore/load_data
+
+cd decision_tree
+docker build --tag decision_tree . && docker tag decision_tree luciasenatore/decision_tree && docker push docker.io/luciasenatore/decision_tree
+
+cd logistic_regression
+docker build --tag logistic_regression . && docker tag logistic_regression luciasenatore/logistic_regression && docker push docker.io/luciasenatore/logistic_regression
+
+cd test_decision_tree
+docker build --tag test_decision_tree . && docker tag test_decision_tree luciasenatore/test_decision_tree && docker push docker.io/luciasenatore/test_decision_tree
+
+cd test_log_regr
+docker build --tag test_log_regr . && docker tag test_log_regr luciasenatore/test_log_regr && docker push docker.io/luciasenatore/test_log_regr
+
+cd show_result
+docker build --tag show_result . && docker tag show_result luciasenatore/show_result && docker push docker.io/luciasenatore/show_result
+
+docker build --tag url_detection . && docker run --publish 8501:8501 -it url_detection && docker tag url_detection luciasenatore/url_detection && docker push docker.io/luciasenatore/url_detection

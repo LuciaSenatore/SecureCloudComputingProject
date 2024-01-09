@@ -1,0 +1,32 @@
+name: Show Result 1.2.2
+description: Returns the best model 
+
+inputs:
+- {name: ModelDT, type: LocalPath, description: 'Best DecisionTree model'}
+- {name: ScalerDT, type: LocalPath, description: 'Best DecisionTree scaler'}
+- { name: AccuracyDT, type: Float, description: 'DecisionTree Accuracy metric' }
+- {name: ModelLR, type: LocalPath, description: 'Best LogisticRegression model'}
+- {name: ScalerLR, type: LocalPath, description: 'Best LogisticRegression scaler'}
+- { name: AccuracyLR, type: Float, description: 'LogisticRegression Accuracy metric' }
+
+
+
+implementation:
+  container:
+    image: luciasenatore/show_result
+    command: [
+      python, show_result.py,
+
+      {inputPath: ModelDT},
+
+      {inputPath: ScalerDT},
+
+      {inputPath: AccuracyDT},
+
+      { inputPath: ModelLR},
+
+      { inputPath: ScalerLR},
+
+      { inputPath: AccuracyLR},
+
+    ]

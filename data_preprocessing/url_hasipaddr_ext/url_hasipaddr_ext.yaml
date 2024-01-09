@@ -1,0 +1,18 @@
+name: IP Extraction Function
+description: Check if a URL has an IP address
+
+inputs:
+- {name: DataIn, type: LocalPath, description: 'Path where data is stored.'}
+outputs:
+- {name: DataOut, type: LocalPath, description: 'Path where data will be stored.'}
+
+implementation:
+  container:
+    image: luciasenatore/url_hasipaddr_ext
+    command: [
+      python, url_hasipaddr_ext.py,
+
+      {inputPath: DataIn},
+      
+      {outputPath: DataOut},
+    ]

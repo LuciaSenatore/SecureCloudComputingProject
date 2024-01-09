@@ -1,0 +1,18 @@
+name: Lenght Extraction Function 
+description: Extracts the lenght of the URL
+
+inputs:
+- {name: DataIn, type: LocalPath, description: 'Path where data is stored.'}
+outputs:
+- {name: DataOut, type: LocalPath, description: 'Path where data will be stored.'}
+
+implementation:
+  container:
+    image: luciasenatore/url_len_ext
+    command: [
+      python, url_len_ext.py,
+
+      {inputPath: DataIn},
+
+      {outputPath: DataOut},
+    ]

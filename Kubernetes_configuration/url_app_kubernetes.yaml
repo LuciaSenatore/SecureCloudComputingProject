@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: url-detection
+  labels:
+    app: url-detection-app
+  namespace: default
+spec:
+  replicas: 5  
+  selector:
+    matchLabels:
+      app: url-detection-app
+  template:
+    metadata:
+      labels:
+        app: url-detection-app
+    spec:
+      containers:
+      - name: url-detection
+        image: luciasenatore/url_detection
+        resources:
+          requests:
+            cpu: "0.5"     
+            memory: "1Gi" #inserire dimensione immagine completa
+          limits:
+            cpu: "1"       
+            memory: "2Gi"  #da modificare
+            
+---
+apiVersion: v1
+# Indicates this as a service
+kind: Service
+metadata:
+  # Service name
+  name: url-detection
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    # Selector for Pods
+    app: url-detection-app
+  ports:
+  # Port Map
+  - port: 8501
+    targetPort: 8501
+    nodePort: 30020
+  
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler  
+metadata:
+  name: url-detection-autoscaler  
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: url-detection  
+  minReplicas: 2   # Numero minimo di repliche
+  maxReplicas: 10  # Numero massimo di repliche
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80 # Percentuale di utilizzo della CPU per lo scaling

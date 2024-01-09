@@ -1,0 +1,33 @@
+name: DecisionTree Classifier
+description: Returns the best model and the accuracy of a DecisionTree Classifier
+
+inputs:
+- {name: TestData, type: LocalPath, description: 'Dataset'}
+- {name: Model, type: LocalPath, description: 'Best DecisionTree model'}
+- {name: Scaler, type: LocalPath, description: 'Best scaler'}
+outputs:
+- {name: ModelDT, type: LocalPath, description: 'Best DecisionTree model'}
+- {name: ScalerDT, type: LocalPath, description: 'Best DecisionTree scaler'}
+- {name: AccuracyDT, type: Float, description: 'DecisionTree Accuracy metric'}
+
+
+implementation:
+  container:
+    image: luciasenatore/test_decision_tree
+    command: [
+      python, test_decision_tree.py,
+
+      {inputPath: TestData},
+
+      {inputPath: Model},
+
+      {inputPath: Scaler},
+
+      {outputPath: ModelDT},
+
+      {outputPath: ScalerDT},
+
+      {outputPath: AccuracyDT},
+
+
+    ]

@@ -1,0 +1,28 @@
+name: DecisionTree Best Model 1.0.4
+description: Trains and Returns the best Model of DecisionTree Classifier
+
+inputs:
+- {name: Data, type: LocalPath, description: 'Path where data is stored.'}
+outputs:
+- {name: Model, type: LocalPath, description: 'Trained best model'}
+- {name: Scaler, type: LocalPath, description: 'Trained best scaler'}
+- {name: TestData, type: LocalPath, description: 'Test data'}
+
+implementation:
+  container:
+    image: luciasenatore/decision_tree
+    command: [
+      python, decision_tree.py,
+
+      --data,
+      {inputPath: Data},
+
+      --model,
+      {outputPath: Model},
+
+      --scaler,
+      {outputPath: Scaler},
+
+      {outputPath: TestData},
+    
+    ]
