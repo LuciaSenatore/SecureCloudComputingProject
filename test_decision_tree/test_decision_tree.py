@@ -42,8 +42,8 @@ def _test_decision_tree(args):
     with open(args.AccuracyDT, 'w') as accuracy_decision_tree_file:
         accuracy_decision_tree_file.write(str(accuracy))
         
-    model_path = Path(args.ModelDT) / 'best_dt_model.joblib'
-    scaler_path = Path(args.ScalerDT) / 'best_dt_scaler.joblib'
+    model_path = Path(args.ModelDT) / 'best_DT_model.joblib'
+    scaler_path = Path(args.ScalerDT) / 'best_DT_scaler.joblib'
 
     joblib.dump(model, model_path)
     joblib.dump(sc, scaler_path)
@@ -63,10 +63,10 @@ if __name__ == '__main__':
 
     # Creating the directory where the output file will be created (the directory may or may not exist).
     Path(args.AccuracyDT).parent.mkdir(parents=True, exist_ok=True)
-    # Creating the directory where the output file will be created (the directory may or may not exist).
-    model_path = Path(args.ModelDT) / 'best_dt_model.joblib'
+
+    model_path = Path(args.ModelDT) / 'best_DT_model.joblib'
     Path(model_path).parent.mkdir(parents=True, exist_ok=True)
-    #print the path of the new directory
+
     scaler_path = Path(args.ScalerDT) / 'best_DT_scaler.joblib'
     Path(scaler_path).parent.mkdir(parents=True, exist_ok=True)
 
