@@ -1,5 +1,5 @@
-name: Logistic Regression Model Testing Function
-description: Returns the best model and the accuracy of a LogisticRegression Classifier
+name: Logistic Regression Model Testing Function 
+description: Returns the test score of a Logistic Regression Classifier
 
 inputs:
 - {name: TestData, type: LocalPath, description: 'Dataset'}
