@@ -1,0 +1,557 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: first-pipeline-
+  annotations: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22, pipelines.kubeflow.org/pipeline_compilation_time: '2024-01-09T16:34:10.746877',
+    pipelines.kubeflow.org/pipeline_spec: '{"description": "Applies Decision Tree
+      and Logistic Regression for a classification problem.", "name": "First Pipeline"}'}
+  labels: {pipelines.kubeflow.org/kfp_sdk_version: 1.8.22}
+spec:
+  entrypoint: first-pipeline
+  templates:
+  - name: contains-hostname-extraction-function
+    container:
+      args: []
+      command: [python, url_hostname_ext.py, /tmp/inputs/DataIn/data, /tmp/outputs/DataOut/data]
+      image: luciasenatore/url_hostname_ext
+    inputs:
+      artifacts:
+      - {name: raw-data-loading-function-Data, path: /tmp/inputs/DataIn/data}
+    outputs:
+      artifacts:
+      - {name: contains-hostname-extraction-function-DataOut, path: /tmp/outputs/DataOut/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Check
+          if URL contains hostname", "implementation": {"container": {"command": ["python",
+          "url_hostname_ext.py", {"inputPath": "DataIn"}, {"outputPath": "DataOut"}],
+          "image": "luciasenatore/url_hostname_ext"}}, "inputs": [{"description":
+          "Path where data is stored.", "name": "DataIn", "type": "LocalPath"}], "name":
+          "Contains Hostname Extraction Function", "outputs": [{"description": "Path
+          where data will be stored.", "name": "DataOut", "type": "LocalPath"}]}',
+        pipelines.kubeflow.org/component_ref: '{"digest": "8e5a71a6b8179fe3031a6da97631d62b298e10e8f30a0cfa75a6786ca60e1e1a",
+          "url": "./data_preprocessing/url_hostname_ext/url_hostname_ext.yaml"}'}
+  - name: decision-tree-grid-search-function
+    container:
+      args: []
+      command: [python, decision_tree.py, --data, /tmp/inputs/Data/data, --model,
+        /tmp/outputs/Model/data, --scaler, /tmp/outputs/Scaler/data, /tmp/outputs/TestData/data]
+      image: luciasenatore/decision_tree
+    inputs:
+      artifacts:
+      - {name: features-merging-function-DataOut, path: /tmp/inputs/Data/data}
+    outputs:
+      artifacts:
+      - {name: decision-tree-grid-search-function-Model, path: /tmp/outputs/Model/data}
+      - {name: decision-tree-grid-search-function-Scaler, path: /tmp/outputs/Scaler/data}
+      - {name: decision-tree-grid-search-function-TestData, path: /tmp/outputs/TestData/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Trains
+          and Returns the best Model of DecisionTree Classifier", "implementation":
+          {"container": {"command": ["python", "decision_tree.py", "--data", {"inputPath":
+          "Data"}, "--model", {"outputPath": "Model"}, "--scaler", {"outputPath":
+          "Scaler"}, {"outputPath": "TestData"}], "image": "luciasenatore/decision_tree"}},
+          "inputs": [{"description": "Path where data is stored.", "name": "Data",
+          "type": "LocalPath"}], "name": "Decision Tree Grid Search Function", "outputs":
+          [{"description": "Trained best model", "name": "Model", "type": "LocalPath"},
+          {"description": "Trained best scaler", "name": "Scaler", "type": "LocalPath"},
+          {"description": "Test data", "name": "TestData", "type": "LocalPath"}]}',
+        pipelines.kubeflow.org/component_ref: '{"digest": "58dbc64db53cce7c90ab6b196fdb46094db99ec97f61a65c23050f3800191057",
+          "url": "decision_tree/decision_tree.yaml"}'}
+  - name: decision-tree-model-testing-function
+    container:
+      args: []
+      command: [python, test_decision_tree.py, /tmp/inputs/TestData/data, /tmp/inputs/Model/data,
+        /tmp/inputs/Scaler/data, /tmp/outputs/ModelDT/data, /tmp/outputs/ScalerDT/data,
+        /tmp/outputs/AccuracyDT/data]
+      image: luciasenatore/test_decision_tree
+    inputs:
+      artifacts:
+      - {name: decision-tree-grid-search-function-Model, path: /tmp/inputs/Model/data}
+      - {name: decision-tree-grid-search-function-Scaler, path: /tmp/inputs/Scaler/data}
+      - {name: decision-tree-grid-search-function-TestData, path: /tmp/inputs/TestData/data}
+    outputs:
+      artifacts:
+      - {name: decision-tree-model-testing-function-AccuracyDT, path: /tmp/outputs/AccuracyDT/data}
+      - {name: decision-tree-model-testing-function-ModelDT, path: /tmp/outputs/ModelDT/data}
+      - {name: decision-tree-model-testing-function-ScalerDT, path: /tmp/outputs/ScalerDT/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Returns
+          the test score of a Decision Tree Classifier", "implementation": {"container":
+          {"command": ["python", "test_decision_tree.py", {"inputPath": "TestData"},
+          {"inputPath": "Model"}, {"inputPath": "Scaler"}, {"outputPath": "ModelDT"},
+          {"outputPath": "ScalerDT"}, {"outputPath": "AccuracyDT"}], "image": "luciasenatore/test_decision_tree"}},
+          "inputs": [{"description": "Dataset", "name": "TestData", "type": "LocalPath"},
+          {"description": "Best DecisionTree model", "name": "Model", "type": "LocalPath"},
+          {"description": "Best scaler", "name": "Scaler", "type": "LocalPath"}],
+          "name": "Decision Tree Model Testing Function", "outputs": [{"description":
+          "Best DecisionTree model", "name": "ModelDT", "type": "LocalPath"}, {"description":
+          "Best DecisionTree scaler", "name": "ScalerDT", "type": "LocalPath"}, {"description":
+          "DecisionTree Accuracy metric", "name": "AccuracyDT", "type": "Float"}]}',
+        pipelines.kubeflow.org/component_ref: '{"digest": "9bed01d1278dea478c942ed3716a9963e56ae97647c6dd5bdc20ff7abf5dc0df",
+          "url": "test_decision_tree/test_decision_tree.yaml"}'}
+  - name: digits-extraction-function
+    container:
+      args: []
+      command: [python, url_count_digit_ext.py, /tmp/inputs/DataIn/data, /tmp/outputs/DataOut/data]
+      image: luciasenatore/url_count_digit_ext
+    inputs:
+      artifacts:
+      - {name: raw-data-loading-function-Data, path: /tmp/inputs/DataIn/data}
+    outputs:
+      artifacts:
+      - {name: digits-extraction-function-DataOut, path: /tmp/outputs/DataOut/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Count
+          Digits in a URL", "implementation": {"container": {"command": ["python",
+          "url_count_digit_ext.py", {"inputPath": "DataIn"}, {"outputPath": "DataOut"}],
+          "image": "luciasenatore/url_count_digit_ext"}}, "inputs": [{"description":
+          "Path where data is stored.", "name": "DataIn", "type": "LocalPath"}], "name":
+          "Digits Extraction Function", "outputs": [{"description": "Path where data
+          will be stored.", "name": "DataOut", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "75d82959bb7f80dbd3422d56379d618112685a89726745335643c1913d2a1350", "url":
+          "./data_preprocessing/url_count_digit_ext/url_count_digit_ext.yaml"}'}
+  - name: features-merging-function
+    container:
+      args: []
+      command: [python, load_data.py, /tmp/inputs/DataCD/data, /tmp/inputs/DataCS/data,
+        /tmp/inputs/DataIP/data, /tmp/inputs/DataSS/data, /tmp/inputs/DataCL/data,
+        /tmp/inputs/DataHN/data, /tmp/inputs/DataHTTPS/data, /tmp/inputs/DataLen/data,
+        /tmp/outputs/DataOut/data]
+      image: luciasenatore/load_data
+    inputs:
+      artifacts:
+      - {name: digits-extraction-function-DataOut, path: /tmp/inputs/DataCD/data}
+      - {name: letters-extraction-function-DataOut, path: /tmp/inputs/DataCL/data}
+      - {name: special-characters-extraction-function-DataOut, path: /tmp/inputs/DataCS/data}
+      - {name: contains-hostname-extraction-function-DataOut, path: /tmp/inputs/DataHN/data}
+      - {name: https-extraction-function-DataOut, path: /tmp/inputs/DataHTTPS/data}
+      - {name: ip-extraction-function-DataOut, path: /tmp/inputs/DataIP/data}
+      - {name: lenght-extraction-function-DataOut, path: /tmp/inputs/DataLen/data}
+      - {name: short-services-extraction-function-DataOut, path: /tmp/inputs/DataSS/data}
+    outputs:
+      artifacts:
+      - {name: features-merging-function-DataOut, path: /tmp/outputs/DataOut/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Merge
+          all features in one dataset", "implementation": {"container": {"command":
+          ["python", "load_data.py", {"inputPath": "DataCD"}, {"inputPath": "DataCS"},
+          {"inputPath": "DataIP"}, {"inputPath": "DataSS"}, {"inputPath": "DataCL"},
+          {"inputPath": "DataHN"}, {"inputPath": "DataHTTPS"}, {"inputPath": "DataLen"},
+          {"outputPath": "DataOut"}], "image": "luciasenatore/load_data"}}, "inputs":
+          [{"description": "Path where count digit feature is stored.", "name": "DataCD",
+          "type": "LocalPath"}, {"description": "Path where count special character
+          feature is stored.", "name": "DataCS", "type": "LocalPath"}, {"description":
+          "Path where IP address feature is stored.", "name": "DataIP", "type": "LocalPath"},
+          {"description": "Path where short service feature is stored.", "name": "DataSS",
+          "type": "LocalPath"}, {"description": "Path where count letter feature is
+          stored.", "name": "DataCL", "type": "LocalPath"}, {"description": "Path
+          where host name feature is stored.", "name": "DataHN", "type": "LocalPath"},
+          {"description": "Path where HTTPS feature is stored.", "name": "DataHTTPS",
+          "type": "LocalPath"}, {"description": "Path where lenght feature is stored.",
+          "name": "DataLen", "type": "LocalPath"}], "name": "Features Merging Function",
+          "outputs": [{"description": "Path where data will be stored.", "name": "DataOut",
+          "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "bf496118528b66c0d277fb8b5ceb2879f2d920885966a52edfc3c1dc1fd3b22a", "url":
+          "load_data/load_data.yaml"}'}
+  - name: first-pipeline
+    dag:
+      tasks:
+      - name: contains-hostname-extraction-function
+        template: contains-hostname-extraction-function
+        dependencies: [raw-data-loading-function]
+        arguments:
+          artifacts:
+          - {name: raw-data-loading-function-Data, from: '{{tasks.raw-data-loading-function.outputs.artifacts.raw-data-loading-function-Data}}'}
+      - name: decision-tree-grid-search-function
+        template: decision-tree-grid-search-function
+        dependencies: [features-merging-function]
+        arguments:
+          artifacts:
+          - {name: features-merging-function-DataOut, from: '{{tasks.features-merging-function.outputs.artifacts.features-merging-function-DataOut}}'}
+      - name: decision-tree-model-testing-function
+        template: decision-tree-model-testing-function
+        dependencies: [decision-tree-grid-search-function]
+        arguments:
+          artifacts:
+          - {name: decision-tree-grid-search-function-Model, from: '{{tasks.decision-tree-grid-search-function.outputs.artifacts.decision-tree-grid-search-function-Model}}'}
+          - {name: decision-tree-grid-search-function-Scaler, from: '{{tasks.decision-tree-grid-search-function.outputs.artifacts.decision-tree-grid-search-function-Scaler}}'}
+          - {name: decision-tree-grid-search-function-TestData, from: '{{tasks.decision-tree-grid-search-function.outputs.artifacts.decision-tree-grid-search-function-TestData}}'}
+      - name: digits-extraction-function
+        template: digits-extraction-function
+        dependencies: [raw-data-loading-function]
+        arguments:
+          artifacts:
+          - {name: raw-data-loading-function-Data, from: '{{tasks.raw-data-loading-function.outputs.artifacts.raw-data-loading-function-Data}}'}
+      - name: features-merging-function
+        template: features-merging-function
+        dependencies: [contains-hostname-extraction-function, digits-extraction-function,
+          https-extraction-function, ip-extraction-function, lenght-extraction-function,
+          letters-extraction-function, short-services-extraction-function, special-characters-extraction-function]
+        arguments:
+          artifacts:
+          - {name: contains-hostname-extraction-function-DataOut, from: '{{tasks.contains-hostname-extraction-function.outputs.artifacts.contains-hostname-extraction-function-DataOut}}'}
+          - {name: digits-extraction-function-DataOut, from: '{{tasks.digits-extraction-function.outputs.artifacts.digits-extraction-function-DataOut}}'}
+          - {name: https-extraction-function-DataOut, from: '{{tasks.https-extraction-function.outputs.artifacts.https-extraction-function-DataOut}}'}
+          - {name: ip-extraction-function-DataOut, from: '{{tasks.ip-extraction-function.outputs.artifacts.ip-extraction-function-DataOut}}'}
+          - {name: lenght-extraction-function-DataOut, from: '{{tasks.lenght-extraction-function.outputs.artifacts.lenght-extraction-function-DataOut}}'}
+          - {name: letters-extraction-function-DataOut, from: '{{tasks.letters-extraction-function.outputs.artifacts.letters-extraction-function-DataOut}}'}
+          - {name: short-services-extraction-function-DataOut, from: '{{tasks.short-services-extraction-function.outputs.artifacts.short-services-extraction-function-DataOut}}'}
+          - {name: special-characters-extraction-function-DataOut, from: '{{tasks.special-characters-extraction-function.outputs.artifacts.special-characters-extraction-function-DataOut}}'}
+      - name: https-extraction-function
+        template: https-extraction-function
+        dependencies: [raw-data-loading-function]
+        arguments:
+          artifacts:
+          - {name: raw-data-loading-function-Data, from: '{{tasks.raw-data-loading-function.outputs.artifacts.raw-data-loading-function-Data}}'}
+      - name: ip-extraction-function
+        template: ip-extraction-function
+        dependencies: [raw-data-loading-function]
+        arguments:
+          artifacts:
+          - {name: raw-data-loading-function-Data, from: '{{tasks.raw-data-loading-function.outputs.artifacts.raw-data-loading-function-Data}}'}
+      - name: lenght-extraction-function
+        template: lenght-extraction-function
+        dependencies: [raw-data-loading-function]
+        arguments:
+          artifacts:
+          - {name: raw-data-loading-function-Data, from: '{{tasks.raw-data-loading-function.outputs.artifacts.raw-data-loading-function-Data}}'}
+      - name: letters-extraction-function
+        template: letters-extraction-function
+        dependencies: [raw-data-loading-function]
+        arguments:
+          artifacts:
+          - {name: raw-data-loading-function-Data, from: '{{tasks.raw-data-loading-function.outputs.artifacts.raw-data-loading-function-Data}}'}
+      - name: logistic-regression-grid-search-function
+        template: logistic-regression-grid-search-function
+        dependencies: [features-merging-function]
+        arguments:
+          artifacts:
+          - {name: features-merging-function-DataOut, from: '{{tasks.features-merging-function.outputs.artifacts.features-merging-function-DataOut}}'}
+      - name: logistic-regression-model-testing-function
+        template: logistic-regression-model-testing-function
+        dependencies: [logistic-regression-grid-search-function]
+        arguments:
+          artifacts:
+          - {name: logistic-regression-grid-search-function-Model, from: '{{tasks.logistic-regression-grid-search-function.outputs.artifacts.logistic-regression-grid-search-function-Model}}'}
+          - {name: logistic-regression-grid-search-function-Scaler, from: '{{tasks.logistic-regression-grid-search-function.outputs.artifacts.logistic-regression-grid-search-function-Scaler}}'}
+          - {name: logistic-regression-grid-search-function-TestData, from: '{{tasks.logistic-regression-grid-search-function.outputs.artifacts.logistic-regression-grid-search-function-TestData}}'}
+      - name: model-evaluation
+        template: model-evaluation
+        dependencies: [decision-tree-model-testing-function, logistic-regression-model-testing-function]
+        arguments:
+          artifacts:
+          - {name: decision-tree-model-testing-function-AccuracyDT, from: '{{tasks.decision-tree-model-testing-function.outputs.artifacts.decision-tree-model-testing-function-AccuracyDT}}'}
+          - {name: decision-tree-model-testing-function-ModelDT, from: '{{tasks.decision-tree-model-testing-function.outputs.artifacts.decision-tree-model-testing-function-ModelDT}}'}
+          - {name: decision-tree-model-testing-function-ScalerDT, from: '{{tasks.decision-tree-model-testing-function.outputs.artifacts.decision-tree-model-testing-function-ScalerDT}}'}
+          - {name: logistic-regression-model-testing-function-AccuracyLR, from: '{{tasks.logistic-regression-model-testing-function.outputs.artifacts.logistic-regression-model-testing-function-AccuracyLR}}'}
+          - {name: logistic-regression-model-testing-function-ModelLR, from: '{{tasks.logistic-regression-model-testing-function.outputs.artifacts.logistic-regression-model-testing-function-ModelLR}}'}
+          - {name: logistic-regression-model-testing-function-ScalerLR, from: '{{tasks.logistic-regression-model-testing-function.outputs.artifacts.logistic-regression-model-testing-function-ScalerLR}}'}
+      - {name: raw-data-loading-function, template: raw-data-loading-function}
+      - name: short-services-extraction-function
+        template: short-services-extraction-function
+        dependencies: [raw-data-loading-function]
+        arguments:
+          artifacts:
+          - {name: raw-data-loading-function-Data, from: '{{tasks.raw-data-loading-function.outputs.artifacts.raw-data-loading-function-Data}}'}
+      - name: special-characters-extraction-function
+        template: special-characters-extraction-function
+        dependencies: [raw-data-loading-function]
+        arguments:
+          artifacts:
+          - {name: raw-data-loading-function-Data, from: '{{tasks.raw-data-loading-function.outputs.artifacts.raw-data-loading-function-Data}}'}
+  - name: https-extraction-function
+    container:
+      args: []
+      command: [python, url_https_ext.py, /tmp/inputs/DataIn/data, /tmp/outputs/DataOut/data]
+      image: luciasenatore/url_https_ext
+    inputs:
+      artifacts:
+      - {name: raw-data-loading-function-Data, path: /tmp/inputs/DataIn/data}
+    outputs:
+      artifacts:
+      - {name: https-extraction-function-DataOut, path: /tmp/outputs/DataOut/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Check
+          if the URL is HTTPS or HTTP and extract the protocol", "implementation":
+          {"container": {"command": ["python", "url_https_ext.py", {"inputPath": "DataIn"},
+          {"outputPath": "DataOut"}], "image": "luciasenatore/url_https_ext"}}, "inputs":
+          [{"description": "Path where data is stored.", "name": "DataIn", "type":
+          "LocalPath"}], "name": "HTTPS Extraction Function", "outputs": [{"description":
+          "Path where data will be stored.", "name": "DataOut", "type": "LocalPath"}]}',
+        pipelines.kubeflow.org/component_ref: '{"digest": "14d674be383a0cc8a1a27c97c0278a8c2eaeffd62372aba6c39f6c36694c363f",
+          "url": "./data_preprocessing/url_https_ext/url_https_ext.yaml"}'}
+  - name: ip-extraction-function
+    container:
+      args: []
+      command: [python, url_hasipaddr_ext.py, /tmp/inputs/DataIn/data, /tmp/outputs/DataOut/data]
+      image: luciasenatore/url_hasipaddr_ext
+    inputs:
+      artifacts:
+      - {name: raw-data-loading-function-Data, path: /tmp/inputs/DataIn/data}
+    outputs:
+      artifacts:
+      - {name: ip-extraction-function-DataOut, path: /tmp/outputs/DataOut/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Check
+          if a URL has an IP address", "implementation": {"container": {"command":
+          ["python", "url_hasipaddr_ext.py", {"inputPath": "DataIn"}, {"outputPath":
+          "DataOut"}], "image": "luciasenatore/url_hasipaddr_ext"}}, "inputs": [{"description":
+          "Path where data is stored.", "name": "DataIn", "type": "LocalPath"}], "name":
+          "IP Extraction Function", "outputs": [{"description": "Path where data will
+          be stored.", "name": "DataOut", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "6e80f7d3dad91037be08b0f029e4126d987cff17ec4197906aa0ee000d0d7bd5", "url":
+          "./data_preprocessing/url_hasipaddr_ext/url_hasipaddr_ext.yaml"}'}
+  - name: lenght-extraction-function
+    container:
+      args: []
+      command: [python, url_len_ext.py, /tmp/inputs/DataIn/data, /tmp/outputs/DataOut/data]
+      image: luciasenatore/url_len_ext
+    inputs:
+      artifacts:
+      - {name: raw-data-loading-function-Data, path: /tmp/inputs/DataIn/data}
+    outputs:
+      artifacts:
+      - {name: lenght-extraction-function-DataOut, path: /tmp/outputs/DataOut/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Extracts
+          the lenght of the URL", "implementation": {"container": {"command": ["python",
+          "url_len_ext.py", {"inputPath": "DataIn"}, {"outputPath": "DataOut"}], "image":
+          "luciasenatore/url_len_ext"}}, "inputs": [{"description": "Path where data
+          is stored.", "name": "DataIn", "type": "LocalPath"}], "name": "Lenght Extraction
+          Function", "outputs": [{"description": "Path where data will be stored.",
+          "name": "DataOut", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "0937f27c8453b96d261fbfa45dfdd24d8654128d1953f94f06ae3781b0240280", "url":
+          "./data_preprocessing/url_len_ext/url_len_ext.yaml"}'}
+  - name: letters-extraction-function
+    container:
+      args: []
+      command: [python, url_count_letters_ext.py, /tmp/inputs/DataIn/data, /tmp/outputs/DataOut/data]
+      image: luciasenatore/url_count_letters_ext
+    inputs:
+      artifacts:
+      - {name: raw-data-loading-function-Data, path: /tmp/inputs/DataIn/data}
+    outputs:
+      artifacts:
+      - {name: letters-extraction-function-DataOut, path: /tmp/outputs/DataOut/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Count
+          Letters in a URL", "implementation": {"container": {"command": ["python",
+          "url_count_letters_ext.py", {"inputPath": "DataIn"}, {"outputPath": "DataOut"}],
+          "image": "luciasenatore/url_count_letters_ext"}}, "inputs": [{"description":
+          "Path where data is stored.", "name": "DataIn", "type": "LocalPath"}], "name":
+          "Letters Extraction Function", "outputs": [{"description": "Path where data
+          will be stored.", "name": "DataOut", "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "f44f9147a0fd63eff60642ae1a355bb1532122968913355630c06372241c166a", "url":
+          "./data_preprocessing/url_count_letters_ext/url_count_letters_ext.yaml"}'}
+  - name: logistic-regression-grid-search-function
+    container:
+      args: []
+      command: [python, logistic_regression.py, --data, /tmp/inputs/Data/data, --model,
+        /tmp/outputs/Model/data, --scaler, /tmp/outputs/Scaler/data, /tmp/outputs/TestData/data]
+      image: luciasenatore/logistic_regression
+    inputs:
+      artifacts:
+      - {name: features-merging-function-DataOut, path: /tmp/inputs/Data/data}
+    outputs:
+      artifacts:
+      - {name: logistic-regression-grid-search-function-Model, path: /tmp/outputs/Model/data}
+      - {name: logistic-regression-grid-search-function-Scaler, path: /tmp/outputs/Scaler/data}
+      - {name: logistic-regression-grid-search-function-TestData, path: /tmp/outputs/TestData/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Trains
+          and Returns the best Model of Logistic Regression Classifier", "implementation":
+          {"container": {"command": ["python", "logistic_regression.py", "--data",
+          {"inputPath": "Data"}, "--model", {"outputPath": "Model"}, "--scaler", {"outputPath":
+          "Scaler"}, {"outputPath": "TestData"}], "image": "luciasenatore/logistic_regression"}},
+          "inputs": [{"description": "Path where data is stored.", "name": "Data",
+          "type": "LocalPath"}], "name": "Logistic Regression Grid Search Function",
+          "outputs": [{"description": "Trained best model", "name": "Model", "type":
+          "LocalPath"}, {"description": "Trained best scaler", "name": "Scaler", "type":
+          "LocalPath"}, {"description": "Test data", "name": "TestData", "type": "LocalPath"}]}',
+        pipelines.kubeflow.org/component_ref: '{"digest": "3358e4b9f9ccffb2513d39b345b58ac9f1160d31cfed5fab3c11af015aef5dfd",
+          "url": "logistic_regression/logistic_regression.yaml"}'}
+  - name: logistic-regression-model-testing-function
+    container:
+      args: []
+      command: [python, test_logistic_regression.py, /tmp/inputs/TestData/data, /tmp/inputs/Model/data,
+        /tmp/inputs/Scaler/data, /tmp/outputs/ModelLR/data, /tmp/outputs/ScalerLR/data,
+        /tmp/outputs/AccuracyLR/data]
+      image: luciasenatore/test_log_regr
+    inputs:
+      artifacts:
+      - {name: logistic-regression-grid-search-function-Model, path: /tmp/inputs/Model/data}
+      - {name: logistic-regression-grid-search-function-Scaler, path: /tmp/inputs/Scaler/data}
+      - {name: logistic-regression-grid-search-function-TestData, path: /tmp/inputs/TestData/data}
+    outputs:
+      artifacts:
+      - {name: logistic-regression-model-testing-function-AccuracyLR, path: /tmp/outputs/AccuracyLR/data}
+      - {name: logistic-regression-model-testing-function-ModelLR, path: /tmp/outputs/ModelLR/data}
+      - {name: logistic-regression-model-testing-function-ScalerLR, path: /tmp/outputs/ScalerLR/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Returns
+          the best model and the accuracy of a LogisticRegression Classifier", "implementation":
+          {"container": {"command": ["python", "test_logistic_regression.py", {"inputPath":
+          "TestData"}, {"inputPath": "Model"}, {"inputPath": "Scaler"}, {"outputPath":
+          "ModelLR"}, {"outputPath": "ScalerLR"}, {"outputPath": "AccuracyLR"}], "image":
+          "luciasenatore/test_log_regr"}}, "inputs": [{"description": "Dataset", "name":
+          "TestData", "type": "LocalPath"}, {"description": "Best LogisticRegression
+          model", "name": "Model", "type": "LocalPath"}, {"description": "Best LogisticRegression
+          scaler", "name": "Scaler", "type": "LocalPath"}], "name": "Logistic Regression
+          Model Testing Function", "outputs": [{"description": "Best LogisticRegression
+          model", "name": "ModelLR", "type": "LocalPath"}, {"description": "Best LogisticRegression
+          scaler", "name": "ScalerLR", "type": "LocalPath"}, {"description": "LogisticRegression
+          Accuracy metric", "name": "AccuracyLR", "type": "Float"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "a1d31e23e0db3b67de99588ad9bf991777828f43be800acbbc399064e0039938", "url":
+          "test_log_regr/test_log_regr.yaml"}'}
+  - name: model-evaluation
+    container:
+      args: []
+      command: [python, show_result.py, /tmp/inputs/ModelDT/data, /tmp/inputs/ScalerDT/data,
+        /tmp/inputs/AccuracyDT/data, /tmp/inputs/ModelLR/data, /tmp/inputs/ScalerLR/data,
+        /tmp/inputs/AccuracyLR/data]
+      image: luciasenatore/show_result
+    inputs:
+      artifacts:
+      - {name: decision-tree-model-testing-function-AccuracyDT, path: /tmp/inputs/AccuracyDT/data}
+      - {name: logistic-regression-model-testing-function-AccuracyLR, path: /tmp/inputs/AccuracyLR/data}
+      - {name: decision-tree-model-testing-function-ModelDT, path: /tmp/inputs/ModelDT/data}
+      - {name: logistic-regression-model-testing-function-ModelLR, path: /tmp/inputs/ModelLR/data}
+      - {name: decision-tree-model-testing-function-ScalerDT, path: /tmp/inputs/ScalerDT/data}
+      - {name: logistic-regression-model-testing-function-ScalerLR, path: /tmp/inputs/ScalerLR/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Returns
+          the best model", "implementation": {"container": {"command": ["python",
+          "show_result.py", {"inputPath": "ModelDT"}, {"inputPath": "ScalerDT"}, {"inputPath":
+          "AccuracyDT"}, {"inputPath": "ModelLR"}, {"inputPath": "ScalerLR"}, {"inputPath":
+          "AccuracyLR"}], "image": "luciasenatore/show_result"}}, "inputs": [{"description":
+          "Best DecisionTree model", "name": "ModelDT", "type": "LocalPath"}, {"description":
+          "Best DecisionTree scaler", "name": "ScalerDT", "type": "LocalPath"}, {"description":
+          "DecisionTree Accuracy metric", "name": "AccuracyDT", "type": "Float"},
+          {"description": "Best LogisticRegression model", "name": "ModelLR", "type":
+          "LocalPath"}, {"description": "Best LogisticRegression scaler", "name":
+          "ScalerLR", "type": "LocalPath"}, {"description": "LogisticRegression Accuracy
+          metric", "name": "AccuracyLR", "type": "Float"}], "name": "Model Evaluation"}',
+        pipelines.kubeflow.org/component_ref: '{"digest": "76d3fde11c5c4d29ad00f4101f80522b3577def650a76bee0dccd4ef9ea2c345",
+          "url": "show_result/show_result.yaml"}'}
+  - name: raw-data-loading-function
+    container:
+      args: []
+      command: [python, load_raw_dataset.py, --data, /tmp/outputs/Data/data]
+      image: luciasenatore/load_raw_dataset
+    outputs:
+      artifacts:
+      - {name: raw-data-loading-function-Data, path: /tmp/outputs/Data/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Load
+          data from local storeddatasets", "implementation": {"container": {"command":
+          ["python", "load_raw_dataset.py", "--data", {"outputPath": "Data"}], "image":
+          "luciasenatore/load_raw_dataset"}}, "name": "Raw Data Loading Function",
+          "outputs": [{"description": "Path where data will be stored.", "name": "Data",
+          "type": "LocalPath"}]}', pipelines.kubeflow.org/component_ref: '{"digest":
+          "10ef93a6bb085365ab46cad94d50110774b354b6b5b4c3b39db0d27572508ba8", "url":
+          "./data_preprocessing/load_raw_dataset/load_raw_dataset.yaml"}'}
+  - name: short-services-extraction-function
+    container:
+      args: []
+      command: [python, url_shortserv_ext.py, /tmp/inputs/DataIn/data, /tmp/outputs/DataOut/data]
+      image: luciasenatore/url_shortserv_ext
+    inputs:
+      artifacts:
+      - {name: raw-data-loading-function-Data, path: /tmp/inputs/DataIn/data}
+    outputs:
+      artifacts:
+      - {name: short-services-extraction-function-DataOut, path: /tmp/outputs/DataOut/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Checks
+          if the URL contains a short service.", "implementation": {"container": {"command":
+          ["python", "url_shortserv_ext.py", {"inputPath": "DataIn"}, {"outputPath":
+          "DataOut"}], "image": "luciasenatore/url_shortserv_ext"}}, "inputs": [{"description":
+          "Path where data is stored.", "name": "DataIn", "type": "LocalPath"}], "name":
+          "Short Services Extraction Function", "outputs": [{"description": "Path
+          where data will be stored.", "name": "DataOut", "type": "LocalPath"}]}',
+        pipelines.kubeflow.org/component_ref: '{"digest": "d2952f228656e21c92d3d0132434f929bed80632481fc4bf4969ca9cdfdc43fc",
+          "url": "./data_preprocessing/url_shortserv_ext/url_shortserv_ext.yaml"}'}
+  - name: special-characters-extraction-function
+    container:
+      args: []
+      command: [python, url_spechar_ext.py, /tmp/inputs/DataIn/data, /tmp/outputs/DataOut/data]
+      image: luciasenatore/url_spechar_ext
+    inputs:
+      artifacts:
+      - {name: raw-data-loading-function-Data, path: /tmp/inputs/DataIn/data}
+    outputs:
+      artifacts:
+      - {name: special-characters-extraction-function-DataOut, path: /tmp/outputs/DataOut/data}
+    metadata:
+      labels:
+        pipelines.kubeflow.org/kfp_sdk_version: 1.8.22
+        pipelines.kubeflow.org/pipeline-sdk-type: kfp
+        pipelines.kubeflow.org/enable_caching: "true"
+      annotations: {pipelines.kubeflow.org/component_spec: '{"description": "Count
+          Special Characters in a URL", "implementation": {"container": {"command":
+          ["python", "url_spechar_ext.py", {"inputPath": "DataIn"}, {"outputPath":
+          "DataOut"}], "image": "luciasenatore/url_spechar_ext"}}, "inputs": [{"description":
+          "Path where data is stored.", "name": "DataIn", "type": "LocalPath"}], "name":
+          "Special Characters Extraction Function", "outputs": [{"description": "Path
+          where data will be stored.", "name": "DataOut", "type": "LocalPath"}]}',
+        pipelines.kubeflow.org/component_ref: '{"digest": "2e423558b3a1420bb01a75ea17c710b7ca96e9a0d8e25f10e6d65eecfb4bd29b",
+          "url": "./data_preprocessing/url_spechar_ext/url_spechar_ext.yaml"}'}
+  arguments:
+    parameters: []
+  serviceAccountName: pipeline-runner

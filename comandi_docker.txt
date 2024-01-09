@@ -1,7 +1,5 @@
 cd load_raw_dataset
-docker build --tag load_raw_dataset .
-docker tag load_raw_dataset luciasenatore/load_raw_dataset
-docker push docker.io/luciasenatore/load_raw_dataset
+docker build --tag load_raw_dataset . && docker tag load_raw_dataset luciasenatore/load_raw_dataset && docker push docker.io/luciasenatore/load_raw_dataset
 
 cd url_count_digit_ext
 docker build --tag url_count_digit_ext . && docker tag url_count_digit_ext luciasenatore/url_count_digit_ext && docker push docker.io/luciasenatore/url_count_digit_ext

@@ -1,4 +1,4 @@
-name: Load Raw Data Function
+name: Raw Data Loading Function
 description: Load data from local storeddatasets
 
 outputs:

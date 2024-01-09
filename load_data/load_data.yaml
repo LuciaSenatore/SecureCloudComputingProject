@@ -1,5 +1,5 @@
-name: Download Data Function
-description: Download data from sklearn datasets
+name: Features Merging Function
+description: Merge all features in one dataset
 
 inputs:
 - {name: DataCD, type: LocalPath, description: 'Path where count digit feature is stored.'}

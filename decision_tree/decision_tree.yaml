@@ -1,4 +1,4 @@
-name: DecisionTree Best Model 1.0.4
+name: Decision Tree Grid Search Function
 description: Trains and Returns the best Model of DecisionTree Classifier
 
 inputs:

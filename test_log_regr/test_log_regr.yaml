@@ -1,4 +1,4 @@
-name: LogisticRegression Classifier
+name: Logistic Regression Model Testing Function
 description: Returns the best model and the accuracy of a LogisticRegression Classifier
 
 inputs:

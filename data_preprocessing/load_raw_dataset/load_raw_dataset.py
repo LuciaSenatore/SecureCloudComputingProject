@@ -5,7 +5,7 @@ import json
 
 
 def _load_data(args):
-    data = pd.read_csv('malicious_phish_copy.csv')
+    data = pd.read_csv('malicious_phish.csv')
 
     data['url'] = data['url'].replace('www.', '', regex=True)
 

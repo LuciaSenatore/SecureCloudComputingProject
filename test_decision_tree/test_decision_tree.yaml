@@ -1,5 +1,5 @@
-name: DecisionTree Classifier
-description: Returns the best model and the accuracy of a DecisionTree Classifier
+name: Decision Tree Model Testing Function 
+description: Returns the test score of a Decision Tree Classifier
 
 inputs:
 - {name: TestData, type: LocalPath, description: 'Dataset'}

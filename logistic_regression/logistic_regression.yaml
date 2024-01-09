@@ -1,5 +1,5 @@
-name: LogisticRegression Best Model 1.0.2
-description: Trains and Returns the best Model of LogisticRegression Classifier
+name: Logistic Regression Grid Search Function
+description: Trains and Returns the best Model of Logistic Regression Classifier
 
 inputs:
 - {name: Data, type: LocalPath, description: 'Path where data is stored.'}
