@@ -21,10 +21,10 @@ spec:
         resources:
           requests:
             cpu: "0.5"     
-            memory: "1Gi" #inserire dimensione immagine completa
+            memory: "1Gi" 
           limits:
-            cpu: "1"       
-            memory: "2Gi"  #da modificare
+            memory: "1Gi"  
+
             
 ---
 apiVersion: v1
@@ -65,4 +65,4 @@ spec:
       name: cpu
       target:
         type: Utilization
-        averageUtilization: 80 # Percentuale di utilizzo della CPU per lo scaling
+        averageUtilization: 70 # Percentuale di utilizzo della CPU per lo scaling

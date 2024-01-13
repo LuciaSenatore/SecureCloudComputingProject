@@ -37,7 +37,7 @@ def has_hostname(url):
     hostname = urlparse(url).hostname
     hostname = str(hostname)
     match = re.search(re.escape(hostname), url)
-    return 1 if match else 0
+    return 0 if match else 1
 
 def is_https(url):
     scheme = urlparse(url).scheme
@@ -105,7 +105,7 @@ def inference(link, scaler, model):
 
 if __name__ == '__main__':
     #set_widemode()
-    sc, model = load('model/best_logistic_regression_scaler.joblib', 'best_logistic_regression_model.joblib')
+    sc, model = load('model/best_dt_scaler.joblib', 'model/best_dt_model.joblib')
 
     original_title = '<h1 style=" font-size: 70px; color:#14F195; margin-block-start: 0;">Fish or Phish</h1>'
     st.markdown(original_title, unsafe_allow_html=True)
