@@ -9,7 +9,7 @@ def _load_data(args):
 
     data['url'] = data['url'].replace('www.', '', regex=True)
 
-    rem = {"Category": {"benign": 0, "defacement": 1, "phishing":1, "malware":1}}
+    rem = {"Category": {"benign": 0, "defacement": 1, "phishing":2, "malware":3}}
     data['Category'] = data['type']
     data = data.replace(rem)
 
