@@ -268,7 +268,7 @@ if __name__ == '__main__':
         if result == 0:
             st.markdown(good_result_html, unsafe_allow_html=True)
             result = None
-        elif result == 1 or result == 2 or result == 3:
+        elif result == 1:
             st.markdown(bad_result_html, unsafe_allow_html=True)
             result = None
         else:
